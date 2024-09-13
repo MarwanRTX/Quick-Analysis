@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Cleaning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+
+    <style>
+        body {
+            background-color: #0e0b2b;
+            color: #f7f7f7;
+            font-family: 'Irish Grover', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .section {
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #222;
+            border-radius: 10px;
+            width: 80%;
+        }
+
+        .about-data {
+            width: 75%;
+            margin: 0 auto;
+            font-size: 18px;
+            background-color: #3c3b63;
+            padding: 20px;
+            line-height: 1.6;
+            border-radius: 10px;
+        }
+
+        .question-mark-container {
+            margin: 20px auto;
+            position: relative;
+            display: flex; /* Use flexbox for alignment */
+            flex-direction: column; /* Stack children vertically */
+            align-items: center; /* Center children horizontally */
+        }
+
+        .question-mark {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            color: white;
+            font-size: 28px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 9999; /* Ensure it is above other elements */
+            transition: background-color 0.3s;
+        }
+
+        .question-mark:hover {
+            background-color: #cc0000;
+        }
+
+        .tooltip {
+    visibility: hidden;
+    width: 300px; /* Adjust width as needed */
+    background-color: #555;
+    color: #fff;
+    text-align: left; /* Align text to the left */
+    border-radius: 5px;
+    padding: 15px; /* Increased padding for better spacing */
+    position: absolute;
+    z-index: 1;
+    bottom: 120%; /* Adjust positioning */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 16px; /* Increase font size */
+    font-family: Arial, sans-serif; /* Use a more readable font */
+}
+
+    .question-mark-container:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+
+        .actions-with-nulls,
+        .actions-with-patterns,
+        .images-section {
+            width: 85%;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 10px;
+        }
+                .slider-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px; /* Space between tooltip and slider */
+        }
+
+        .slider-container span {
+            margin-right: 10px;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px; /* Width of the slider */
+            height: 34px; /* Height of the slider */
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #4caf50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:active:before {
+            width: 32px;
+        }
+
+
+        .actions-with-nulls .columns-wrapper,
+        .actions-with-patterns .columns-wrapper,
+        .images-section .columns-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .columns {
+            display: inline-flex;
+            width: max-content;
+        }
+
+        .column,
+        .column-pattern {
+            background-color: #3c3b63;
+            padding: 20px;
+            border-radius: 5px;
+            width: 28%;
+            text-align: center;
+            margin-right: 10px;
+            display: inline-block;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .column:hover,
+        .column-pattern:hover {
+            background-color: #4a4a8c;
+            transform: scale(1.05);
+        }
+
+        .column p,
+        .column-pattern p {
+            margin: 10px 0;
+        }
+
+        .column select,
+        .column input[type="text"] {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .images-section .columns {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .images-section .column {
+            width: 48%; /* Adjust width to ensure images fit side by side */
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .images-section img {
+            width: 50%; /* Adjust to make images smaller */
+            height: auto;
+            border-radius: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 0 auto;
+        }
+
+        .images-section .column:hover img {
+            transform: scale(1.05); /* Slightly enlarge image on hover */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 20px 0;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #ff4d4d;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Data Information Section -->
+    <div class="section about-data">
+        <h2>About the data:</h2>
+        <p>Number of nulls: {{ num_nulls }}</p>
+        <p>Number of Duplicated: {{ num_duplicated }}</p>
+    </div>
+    
+    <!-- Actions with Null Values -->
+    <form action="/apply_changes" method="POST">
+        <div class="section actions-with-nulls">
+            <div class="columns-wrapper">
+                <h2>Actions with Null Values</h2>
+                <div class="columns">
+                    {% for col, null_count in null_columns.items() %}
+                    <div class="column">
+                        <p>{{ col }}<br> nulls: {{ null_count }}</p>
+                        <select name="action_{{ col }}" onchange="toggleSpecificValueInput(this)">
+                            <option value="none">No Action</option>
+                            <option value="drop">Drop</option>
+                            {% if column_types[col] != 'object' %}
+                                <option value="replace_mean">Replace with Mean</option>
+                                <option value="replace_median">Replace with Median</option>
+                            {% endif %}
+                            <option value="replace_specific">Replace with Specific Value</option>
+                        </select>
+                        <input type="text" name="specific_value_{{ col }}" placeholder="Enter specific value" style="display:none;">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="question-mark-container">
+            <p class="question-mark">?</p>
+            <div class="tooltip">
+                <strong>Data Cleaning Tips:</strong><br><br>
+                <strong>Drop Values:</strong> Use when only a few entries are missing (e.g., removing rows with missing values).<br><br>
+                <strong>Replace with NaN:</strong> Keep data and mark it as missing (e.g., replace blanks with NaN).<br><br>
+                <strong>Replace with Mean/Median:</strong> Fill missing values with average (e.g., replace missing temperature with the average of recorded temperatures).<br><br>
+                <strong>Pattern Removal:</strong> Remove specific patterns (e.g., delete unwanted text like "N/A" from a column).<br>
+            </div>
+            <div class="slider-container">
+                <span>Remove Outliers:</span>
+                <label class="switch">
+                    <input type="checkbox" id="remove-outliers">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Remove Pattern Section -->
+        <div class="section actions-with-patterns">
+            <div class="columns-wrapper">
+                <h2>Remove Patterns</h2>
+                <div class="columns">
+                    {% for col in all_cols %}
+                    <div class="column-pattern">
+                        <p>Column: {{ col }}</p>
+                        <input type="text" name="pattern_{{ col }}" placeholder="Enter pattern to remove">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Images Section -->
+        <div class="section images-section">
+            <div class="columns-wrapper">
+                <h2>Visualizations</h2>
+                <div class="columns">
+                    <div class="column">
+                        <img src="{{ url_for('static', filename='downloads/' + file_base_name + '/plots/' + file_base_name + '_seaborn_null.png') }}" alt="Seaborn Null Image">
+                    </div>
+                    <div class="column">
+                        <img src="{{ url_for('static', filename='downloads/' + file_base_name + '/plots/' + file_base_name + '_missingno_null.png') }}" alt="Missingno Null Image">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Apply Changes and processed</button>
+    </form>
+    {% if download_link %}
+    <div class="section download-link">
+        <p>Your files have been processed. <a href="{{ download_link }}" download>Click here to download the .rar file.</a></p>
+    </div>
+{% endif %}
+
+    <script>
+        // Toggle visibility of specific value input based on the selection
+        function toggleSpecificValueInput(selectElement) {
+            const inputElement = selectElement.nextElementSibling;
+            if (selectElement.value === 'replace_specific') {
+                inputElement.style.display = 'block'; // Show input field
+            } else {
+                inputElement.style.display = 'none';  // Hide input field
+            }
+        }
+    </script>
+    <script>
+        // Toggle visibility of specific value input based on the selection
+        function toggleSpecificValueInput(selectElement) {
+            const inputElement = selectElement.nextElementSibling;
+            if (selectElement.value === 'replace_specific') {
+                inputElement.style.display = 'block'; // Show input field
+            } else {
+                inputElement.style.display = 'none';  // Hide input field
+            }
+        }
+    </script>
+
+    
+<script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const removeOutliersSwitch = document.getElementById('remove-outliers');
+            const removeOutliers = removeOutliersSwitch.checked ? 'on' : 'off';
+            
+            // Add the state to a hidden input field
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'remove-outliers';
+            hiddenInput.value = removeOutliers;
+            this.appendChild(hiddenInput);
+        });
+</script>
+
+
+</body>
+</html>

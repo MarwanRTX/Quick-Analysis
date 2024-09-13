@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Description</title>
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+
+    <style>
+        body {
+            font-family: 'Irish Grover', cursive;
+            background-color: #070F2B;
+            color: #9290C3;
+            text-align: center;
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1B1A55;
+            border-radius: 15px;
+        }
+
+        h1 {
+            color: #9290C3;
+            margin-bottom: 20px;
+        }
+
+        .data-name {
+            font-size: 1.2em;
+            color: #1B1A55;
+            background-color: #535C91;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .top-boxes {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            background-color: #070F2B;
+            color: #9290C3;
+            width: 30%;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .scrollable-content {
+            max-height: 200px; /* Adjust height as needed */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .middle-boxes {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .describe-box, .info-box {
+            background-color: #070F2B;
+            width: 45%; /* Adjusted to make more space between the boxes */
+            padding: 20px;
+            border-radius: 10px;
+            box-sizing: border-box;
+            max-height: 300px; /* Added max-height to control overflow */
+            overflow: auto; /* Added scroll for better content fit */
+        }
+
+        .describe-box h2, .info-box h2 {
+            color: #9290C3;
+            margin-bottom: 10px;
+        }
+
+.outliers-box{
+    background-color: #070F2B;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.outliers-box h2, .head-box h2, .tail-box h2, .scrollable-table h2 {
+    color: #9290C3;
+}
+
+.scrollable-table {
+    background-color: #070F2B;
+    padding: 20px;
+    border-radius: 10px;
+    overflow-x: auto; /* Added horizontal scroll */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #9290C3;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    color: #9290C3;
+}
+
+th {
+    background-color: #1B1A55;
+}
+
+.info-table {
+    background-color: #070F2B;
+    padding: 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.info-table pre {
+    text-align: left; /* Align text to the left for better readability */
+    white-space: pre-wrap; /* Ensures long lines wrap */
+    color: #9290C3;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Describe of Data</h1>
+
+<div class="top-boxes">
+    <div class="box" id="numeric-box">Numeric Columns
+        <div class="scrollable-content">
+            <pre>{{ data_preview.numeric_cols|safe }}</pre>
+        </div>
+    </div>
+    <div class="box" id="object-box">Object Columns
+        <div class="scrollable-content">
+            <pre>{{ data_preview.object_cols|safe }}</pre>
+        </div>
+    </div>
+    <div class="box" id="null-box">Null Columns
+        <div class="scrollable-content">
+            <pre>{{ data_preview.formatted_nulls|safe }}</pre>
+        </div>
+    </div>
+</div>
+
+<div class="middle-boxes">
+    <div class="describe-box">
+        <h2>Describe:</h2>
+        <div class="content">
+            {{ data_preview.description|safe }}
+        </div>
+    </div>
+    <div class="info-box">
+        <h2>Info:</h2>
+        <div class="info-table">
+            <pre>{{ data_preview.info|safe }}</pre>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="head-box">
+    <h2>Head:</h2>
+    <div class="scrollable-table">
+        {{ data_preview.head|safe }}
+    </div>
+</div>
+<div class="tail-box">
+    <h2>Tail:</h2>
+    <div class="scrollable-table">
+        {{ data_preview.tail|safe }}
+    </div>
+</div>
+<h2>Sample of Data :</h2>
+<div class="scrollable-table">
+    {{ data_preview.sample|safe }}
+</div>
+<h2>Sample of Outliers :</h2>
+
+<div class="scrollable-table">
+    <h1>Detected Outliers</h1>
+    {% if text %}
+        <div>{{ text|safe }}</div>
+    {% else %}
+        <p>No data to display.</p>
+    {% endif %}
+</div>
+<h1>Important PDF</h1>
+
+<div class="scrollable-table">
+    <!-- Displaying the PDF plot (use an iframe or link) -->
+    <iframe src="{{ url_for('static', filename='downloads/' + file_base_name + '/plots/' + file_base_name + '_combined.pdf') }}" width="100%" height="500px"></iframe>
+    Your browser does not support PDFs. Please download the PDF to view it: 
+    <a href="{{ url_for('static', filename='downloads/' + file_base_name + '/plots/' + file_base_name + '_combined.pdf') }}">Download PDF</a>.
+</div>
+
+
+<div class="download-section">
+    <a href="{{ url_for('main.download_plots') }}" class="btn btn-primary">Download Plots Only (.rar)</a>
+</div>
+
+
+
+
+
+
+
+<script>
+document.getElementById('data-cleaning-box').addEventListener('mouseover', function() {
+    document.getElementById('cleaning-box').style.display = 'block';
+});
+
+document.getElementById('data-cleaning-box').addEventListener('mouseleave'  , function() {
+    document.getElementById('cleaning-box').style.display = 'none';
+});
+
+document.getElementById('data-exploration-box').addEventListener('mouseover', function() {
+    document.getElementById('exploration-box').style.display = 'block';
+});
+
+document.getElementById('data-exploration-box').addEventListener('mouseleave', function() {
+    document.getElementById('exploration-box').style.display = 'none';
+});
+</script>
+
+
+
+</body>
+</html>

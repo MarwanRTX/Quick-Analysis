@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Quick Analysis Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a; /* Dark background */
+            color: #e0e0e0; /* Light text */
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: #2e2e2e; /* Slightly lighter background */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            transform: translateY(100px);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            color: #9b59b6; /* Purple color */
+            margin-bottom: 20px;
+            animation: fadeInText 1.5s ease-out;
+        }
+
+        @keyframes fadeInText {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        p, table {
+            margin-top: 20px;
+            color: #00ffd5; /* Light blue color */
+            animation: fadeInText 1.5s ease-out;
+        }
+
+        input[type="file"], input[type="submit"], input[type="button"] {
+            background: #1a1a1a; /* Dark background */
+            border: 2px solid #9b59b6; /* Purple border */
+            color: #e0e0e0; /* Light text */
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        input[type="submit"]:hover, input[type="button"]:hover {
+            background: #8e44ad; /* Darker purple on hover */
+            transform: scale(1.05);
+        }
+
+        input[type="button"] {
+            display: inline-block; /* Initially visible but disabled */
+            cursor: not-allowed; /* Show as disabled */
+        }
+
+        #loading {
+            display: none;
+            color: #00ffd5; /* Light blue color for loading text */
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        .message {
+            margin-top: 20px;
+            color: #ff6666; /* Red color for error messages */
+        }
+
+        /* Cool pulsating animation for the upload button */
+        input[type="submit"] {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        input[type="submit"]::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(0, 255, 213, 0.2), transparent);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.6s, transform 0.6s;
+        }
+
+        input[type="submit"]:hover::before {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        /* Text and animation for the project intro */
+        .project-intro {
+            color: #e0e0e0;
+            font-size: 18px;
+            animation: fadeInText 2s ease-out;
+        }
+
+        .pagination-controls {
+            margin-top: 20px;
+        }
+
+        /* Background animation */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(45deg, #8e44ad, #00ffd5);
+            z-index: -1;
+            animation: rotateBackground 10s linear infinite;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        @keyframes rotateBackground {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Quick Analysis</h1>
+        <p class="project-intro">
+            Quick Analysis is a powerful tool that allows users to upload CSV files and quickly 
+            analyze and clean data. Whether you need to explore data patterns or perform 
+            advanced data cleaning, our platform makes it easy to process <strong>15MB</strong> datasets 
+            efficiently and effectively. Upload your file below to get started, and enjoy 
+            the seamless experience of working with your data in just a few clicks!
+        </p>
+
+        <form onsubmit="uploadFile(event)" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <input type="submit" value="Upload">
+            <input type="button" id="exploreButton" value="Go to Data Explore" onclick="goToDataExplore()" disabled>
+            <input type="button" id="cleaningButton" value="Go to Data Cleaning" onclick="goToDataCleaning()" disabled>
+        </form>
+        
+        <div id="loading">Loading plots...</div>
+        <div id="message" class="message"></div>
+        <div id="dataContainer"></div>
+        <div class="pagination-controls"></div>
+    </div>
+
+    <script>
+        function goToDataExplore() {
+            window.location.href = "/dataexplore";
+        }
+
+        function goToDataCleaning() {
+            window.location.href = "/datacleaning";
+        }
+
+        function uploadFile(event) {
+            event.preventDefault();
+            showLoading();
+            
+            var formData = new FormData(document.querySelector('form'));
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                hideLoading();
+                if (data.success) {
+                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').style.color = '#00ff00'; // Green color for success
+                    enableButtons(); // Enable the buttons
+                } else {
+                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').style.color = '#ff6666'; // Red color for error
+                }
+              }).catch(error => {
+                hideLoading();
+                document.getElementById('message').textContent = 'An error occurred while uploading the file.';
+                document.getElementById('message').style.color = '#ff6666';
+              });
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function enableButtons() {
+            document.getElementById('exploreButton').disabled = false;
+            document.getElementById('exploreButton').style.cursor = 'pointer'; // Change cursor to pointer
+            document.getElementById('cleaningButton').disabled = false;
+            document.getElementById('cleaningButton').style.cursor = 'pointer'; // Change cursor to pointer
+        }
+    </script>
+</body>
+</html>
